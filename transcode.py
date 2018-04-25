@@ -11,7 +11,7 @@ from sse import ServerSentEvent
 from flask import Flask, render_template, session, redirect, url_for, Response, request, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, FileField
 from wtforms.validators import Required, Length
 import yaml
 
@@ -47,6 +47,7 @@ with open('progress.txt', 'w') as f:
 class DirectoryForm(FlaskForm):
     source_directory = StringField('Source Directory', validators=[Required(),
                                                          Length(1, 100)])
+    new_source_directory = MultipleFileField()
     submit = SubmitField(label='Submit')
     transcode = SubmitField(label='Transcode')
 
@@ -153,6 +154,7 @@ def index():
         session['source_dir'] = form.source_directory.data
         full_source_files = get_source_files(session['source_dir'])
         source_files = set_display_files(full_source_files)
+        print(form.data)
         if not source_files:
             flash("No Files to Transcode","alert-warning")
             return redirect(url_for('index'))
