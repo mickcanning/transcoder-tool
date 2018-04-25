@@ -11,7 +11,7 @@ from sse import ServerSentEvent
 from flask import Flask, render_template, session, redirect, url_for, Response, request, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FileField
+from wtforms import StringField, SubmitField, FileField, MultipleFileField
 from wtforms.validators import Required, Length
 import yaml
 
