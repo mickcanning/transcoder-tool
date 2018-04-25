@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Transcoding Files to {{ output_type }}{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <h3>Progress bar 1</h3>
+    <div class="progress">
+        <div class="progress-bar" id="progress_bar_1" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0%" style="width: {{ progress }}%">
+        </div>
+    </div>
+</div>
+   
+{% endblock %}

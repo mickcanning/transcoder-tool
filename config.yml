@@ -1,0 +1,5 @@
+hbcli: "/usr/local/bin/HandBrakeCLI"
+input_file_type: ".mkv"
+output_file_type: ".mp4"
+delete_original: false
+preset: "iPad"
