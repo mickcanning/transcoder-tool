@@ -11,7 +11,7 @@ from sse import ServerSentEvent
 from flask import Flask, render_template, session, redirect, url_for, Response, request, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FileField, MultipleFileField
+from wtforms.fields import StringField, SubmitField, FileField, TextField, SelectField
 from wtforms.validators import Required, Length
 import yaml
 
@@ -36,9 +36,22 @@ input_file_type = config["input_file_type"]
 output_file_type = config["output_file_type"]
 delete_original = config["delete_original"]
 preset = config["preset"]
+media_dir = config["media"]
 first_run=True
 barsegments=0
 file_count=0
+
+def build_directory_tree(media_d):
+    dir_list = []
+    for r,d,f in os.walk(media_d):
+        for file in f:
+            if file.endswith(input_file_type):
+                base_r = os.path.basename(r)
+                if base_r not in dir_list: dir_list.append(base_r)
+    dir_list.sort
+    return sorted(dir_list)
+
+DIR_CHOICES = build_directory_tree(media_dir)
 
 #initialize progress bar count at 0, using file for interprocess comms
 with open('progress.txt', 'w') as f:
@@ -47,14 +60,14 @@ with open('progress.txt', 'w') as f:
 class DirectoryForm(FlaskForm):
     source_directory = StringField('Source Directory', validators=[Required(),
                                                          Length(1, 100)])
-    new_source_directory = MultipleFileField()
+  #  new_source_directory = FileField()
     submit = SubmitField(label='Submit')
     transcode = SubmitField(label='Transcode')
+    source_dir = SelectField(label='Directory', choices=[(dir,dir) for dir in DIR_CHOICES])
 
 
 class TranscodeForm(FlaskForm):
     transcode = SubmitField(label='Start Transcode')
-
 
 def get_source_files(source_d):
     file_list = []
@@ -154,7 +167,7 @@ def index():
         session['source_dir'] = form.source_directory.data
         full_source_files = get_source_files(session['source_dir'])
         source_files = set_display_files(full_source_files)
-        print(form.data)
+     #   print(form.dir.data)
         if not source_files:
             flash("No Files to Transcode","alert-warning")
             return redirect(url_for('index'))
