@@ -48,6 +48,7 @@ def build_directory_tree(media_d):
             if file.endswith(input_file_type):
                 base_r = os.path.basename(r)
                 if base_r not in dir_list: dir_list.append(base_r)
+    dir_list.append("All")                
     dir_list.sort
     return sorted(dir_list)
 
@@ -58,13 +59,10 @@ with open('progress.txt', 'w') as f:
     f.write("0")
 
 class DirectoryForm(FlaskForm):
-    source_directory = StringField('Source Directory', validators=[Required(),
-                                                         Length(1, 100)])
-  #  new_source_directory = FileField()
+    source_dir = SelectField(label='Directory', choices=[(dir,dir) for dir in DIR_CHOICES])
     submit = SubmitField(label='Submit')
     transcode = SubmitField(label='Transcode')
-    source_dir = SelectField(label='Directory', choices=[(dir,dir) for dir in DIR_CHOICES])
-
+ 
 
 class TranscodeForm(FlaskForm):
     transcode = SubmitField(label='Start Transcode')
@@ -161,10 +159,13 @@ def index():
     session['source_dir'] = None
     source_files = ""
     target_files = {}
-
+    DIR_CHOICES = build_directory_tree(media_dir)
     form = DirectoryForm()
     if form.validate_on_submit() and form.submit.data:
-        session['source_dir'] = form.source_directory.data
+        if form.source_dir.data == "All":
+            session['source_dir'] = media_dir
+        else:
+            session['source_dir'] = media_dir + form.source_dir.data
         full_source_files = get_source_files(session['source_dir'])
         source_files = set_display_files(full_source_files)
      #   print(form.dir.data)
@@ -176,7 +177,10 @@ def index():
             target_files = get_target_files(full_source_files)
     else:
         if form.validate_on_submit() and form.transcode.data:
-            session['source_dir'] = form.source_directory.data
+            if form.source_dir.data == "All":
+                session['source_dir'] = media_dir
+            else:
+                session['source_dir'] = media_dir + form.source_dir.data
             full_source_files = get_source_files(session['source_dir'])
             source_files = set_display_files(full_source_files)
             if not source_files:
