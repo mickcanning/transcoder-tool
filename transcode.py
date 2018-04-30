@@ -40,14 +40,19 @@ media_dir = config["media"]
 first_run=True
 barsegments=0
 file_count=0
+media_dir_split = media_dir.split("/")
+show_loc = len(media_dir_split)-1
+
 
 def build_directory_tree(media_d):
     dir_list = []
+    split_r = []
     for r,d,f in os.walk(media_d):
         for file in f:
             if file.endswith(input_file_type):
-                base_r = os.path.basename(r)
-                if base_r not in dir_list: dir_list.append(base_r)
+                split_r = r.split("/")
+                show_name = split_r[show_loc]
+                if show_name not in dir_list: dir_list.append(show_name)
     dir_list.append("All")                
     dir_list.sort
     return sorted(dir_list)
