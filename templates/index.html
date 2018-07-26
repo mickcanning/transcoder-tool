@@ -10,6 +10,31 @@
  </head>
 <body>
     <h1>Transcode Files</h1>
+    
+    <!-- <input type=file id=new_source_directory webkitdirectory directory multiple> -->
+
+    <!--- {{ wtf.quick_form(form) }} -->
+
+    <form action="" method="post" class="form" role="form">
+         {{ form.csrf_token }}
+
+
+        <!-- {{ form.source_dir }} -->
+
+        <select class="form-control" id="source_dir" name="source_dir">
+            {% for choice in choices %}   
+                {% if choice == selected_dir %}
+                    <option value="{{choice}}" selected>{{ choice }}</option>
+                {% else %}
+                    <option value="{{choice}}">{{ choice }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <br>
+        {{ form.submit }} {{ form.transcode }}
+        <br><br>
+    </form>
+   
     <table class="table table-hover">
         <tr>
             <th>Source File</th>
@@ -21,14 +46,11 @@
          </tr>
         {% endfor %}
     </table>
-    <!-- <input type=file id=new_source_directory webkitdirectory directory multiple> -->
-
-    {{ wtf.quick_form(form) }}
-
-
-        <div class="progress">
+    
+  
+<div class="progress">
             <div class="progress-bar progress-bar-info progress-bar-striped" id="progress-bar" role="progressbar"
-                 aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                 aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">Processing Files...</div>
         </div>
 
 

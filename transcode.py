@@ -58,18 +58,36 @@ def build_directory_tree(media_d):
     return sorted(dir_list)
 
 DIR_CHOICES = build_directory_tree(media_dir)
+#DIR_CHOICES = []
 
 #initialize progress bar count at 0, using file for interprocess comms
 with open('progress.txt', 'w') as f:
     f.write("0")
 
-class DirectoryForm(FlaskForm):
+class BaseForm(FlaskForm):
+  def __iter__(self):
+    token = self.csrf_token
+    yield token
+
+    field_names = {token.name}
+    for cls in self.__class__.__bases__:
+      for field in cls():
+        field_name = field.name
+        if field_name not in field_names:
+          field_names.add(field_name)
+          yield self[field_name]
+
+    for field_name in self._fields:
+      if field_name not in field_names:
+        yield self[field_name]
+
+class DirectoryForm(BaseForm):
     source_dir = SelectField(label='Directory', choices=[(dir,dir) for dir in DIR_CHOICES])
-    submit = SubmitField(label='Submit')
+    submit = SubmitField(label='List Files')
     transcode = SubmitField(label='Transcode')
  
 
-class TranscodeForm(FlaskForm):
+class TranscodeForm(BaseForm):
     transcode = SubmitField(label='Start Transcode')
 
 def get_source_files(source_d):
@@ -162,18 +180,24 @@ def progress():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     session['source_dir'] = None
+    selected_dir = ""
     source_files = ""
     target_files = {}
     DIR_CHOICES = build_directory_tree(media_dir)
+
     form = DirectoryForm()
-    if form.validate_on_submit() and form.submit.data:
+    if request.method == "POST" and form.submit.data:
+       
         if form.source_dir.data == "All":
             session['source_dir'] = media_dir
         else:
             session['source_dir'] = media_dir + form.source_dir.data
+            print(form.source_dir.data)
+        selected_dir = form.source_dir.data
         full_source_files = get_source_files(session['source_dir'])
+        print(full_source_files)
         source_files = set_display_files(full_source_files)
-     #   print(form.dir.data)
+     
         if not source_files:
             flash("No Files to Transcode","alert-warning")
             return redirect(url_for('index'))
@@ -181,7 +205,7 @@ def index():
             full_source_files.sort()
             target_files = get_target_files(full_source_files)
     else:
-        if form.validate_on_submit() and form.transcode.data:
+        if request.method == "POST" and form.transcode.data:
             if form.source_dir.data == "All":
                 session['source_dir'] = media_dir
             else:
@@ -196,8 +220,8 @@ def index():
                 tcode=transcode_files(session['source_dir'])
                 if tcode:
                     flash("Files Transcoded","alert-success")
-
-    return render_template('index.html', output_type=output_file_type, files=source_files, target_files=target_files, form=form)
+            
+    return render_template('index.html', output_type=output_file_type, files=source_files, target_files=target_files, form=form, choices=DIR_CHOICES, selected_dir=selected_dir)
 
 
 @app.errorhandler(404)
