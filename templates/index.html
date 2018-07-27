@@ -11,17 +11,15 @@
 <body>
     <h1>Transcode Files</h1>
     
-    <!-- <input type=file id=new_source_directory webkitdirectory directory multiple> -->
+   
 
-    <!--- {{ wtf.quick_form(form) }} -->
-
-    <form action="" method="post" class="form" role="form">
+    <form action="/" method="post" class="form" role="form" id="transcode_form" name="transcode_form">
+        <div class=“form-group” id=“transcoder_form”>
          {{ form.csrf_token }}
 
 
-        <!-- {{ form.source_dir }} -->
 
-        <select class="form-control" id="source_dir" name="source_dir">
+        <select class="form-control sourcedir" id="source_dir" name="source_dir" onchange="submitFormOnSelect()">
             {% for choice in choices %}   
                 {% if choice == selected_dir %}
                     <option value="{{choice}}" selected>{{ choice }}</option>
@@ -31,8 +29,10 @@
             {% endfor %}
         </select>
         <br>
-        {{ form.submit }} {{ form.transcode }}
+
+        {{ form.transcode }}
         <br><br>
+    </div>
     </form>
    
     <table class="table table-hover">
@@ -69,6 +69,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script type="text/javascript">
+
+   
+    
+
+    function submitFormOnSelect() {
+            $("#transcode_form").submit();
+        }
 
     function progressBar(progressBarId, progressId, progress) {
         $(progressBarId).css("width", progress + "%");

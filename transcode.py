@@ -58,7 +58,7 @@ def build_directory_tree(media_d):
     return sorted(dir_list)
 
 DIR_CHOICES = build_directory_tree(media_dir)
-#DIR_CHOICES = []
+
 
 #initialize progress bar count at 0, using file for interprocess comms
 with open('progress.txt', 'w') as f:
@@ -186,40 +186,39 @@ def index():
     DIR_CHOICES = build_directory_tree(media_dir)
 
     form = DirectoryForm()
-    if request.method == "POST" and form.submit.data:
-       
+
+    if request.method == "POST" and not form.transcode.data:
+    
         if form.source_dir.data == "All":
             session['source_dir'] = media_dir
         else:
             session['source_dir'] = media_dir + form.source_dir.data
-            print(form.source_dir.data)
         selected_dir = form.source_dir.data
         full_source_files = get_source_files(session['source_dir'])
-        print(full_source_files)
         source_files = set_display_files(full_source_files)
-     
+        
         if not source_files:
             flash("No Files to Transcode","alert-warning")
             return redirect(url_for('index'))
         else:
             full_source_files.sort()
             target_files = get_target_files(full_source_files)
-    else:
-        if request.method == "POST" and form.transcode.data:
-            if form.source_dir.data == "All":
-                session['source_dir'] = media_dir
-            else:
-                session['source_dir'] = media_dir + form.source_dir.data
-            full_source_files = get_source_files(session['source_dir'])
-            source_files = set_display_files(full_source_files)
-            if not source_files:
-                flash(u'No Files to Transcode', 'alert-warning')
-                return redirect(url_for('index'))
-            else:
-                target_files = get_target_files(full_source_files)    
-                tcode=transcode_files(session['source_dir'])
-                if tcode:
-                    flash("Files Transcoded","alert-success")
+
+    if request.method == "POST" and form.transcode.data:
+        if form.source_dir.data == "All":
+            session['source_dir'] = media_dir
+        else:
+            session['source_dir'] = media_dir + form.source_dir.data
+        full_source_files = get_source_files(session['source_dir'])
+        source_files = set_display_files(full_source_files)
+        if not source_files:
+            flash(u'No Files to Transcode', 'alert-warning')
+            return redirect(url_for('index'))
+        else:
+            target_files = get_target_files(full_source_files)    
+            tcode=transcode_files(session['source_dir'])
+            if tcode:
+                flash("Files Transcoded","alert-success")
             
     return render_template('index.html', output_type=output_file_type, files=source_files, target_files=target_files, form=form, choices=DIR_CHOICES, selected_dir=selected_dir)
 
